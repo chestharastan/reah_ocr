@@ -1,38 +1,23 @@
 import numpy as np
 import torch.nn as nn
 from PIL import Image
+from skimage.morphology import skeletonize
 from torchvision import transforms
-
-
-import cv2
-import numpy as np
-from PIL import Image
 
 
 class SkeletonTransform:
     """
-    Skeletonize black text on white background using OpenCV.
+    Skeletonize black text on white background using Zhang-Suen thinning (scikit-image).
+    Converts strokes to 1-pixel-wide centerlines.
     """
     def __call__(self, img):
         arr = np.array(img.convert("L"))
-
-        # black text becomes white foreground
-        _, binary = cv2.threshold(
-            arr,
-            128,
-            255,
-            cv2.THRESH_BINARY_INV
-        )
-
-        skeleton = cv2.ximgproc.thinning(
-            binary,
-            thinningType=cv2.ximgproc.THINNING_ZHANGSUEN
-        )
-
-        # convert back: black text on white background
-        skeleton = 255 - skeleton
-
-        return Image.fromarray(skeleton, mode="L")
+        # text pixels are dark (< 128) → True for foreground
+        binary = arr < 128
+        skel = skeletonize(binary).astype(np.uint8) * 255
+        # invert back: black text on white background
+        skel = 255 - skel
+        return Image.fromarray(skel, mode="L")
 
 
 class Model(nn.Module):

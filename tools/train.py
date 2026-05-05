@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import time
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -8,7 +9,8 @@ from functools import partial
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from utils import load_config, load_checkpoint, save_checkpoint, save_best_model
+from utils import (load_config, load_checkpoint, save_checkpoint, save_best_model,
+                   init_experiment_log, log_epoch, finish_experiment_log)
 from dataset import OCRDataset
 from vocab import KhmerVocab
 from collate import ocr_collate_fn
@@ -161,14 +163,19 @@ def main():
     # Training setup
     # -----------------------------
     best_cer = float("inf")
+    best_epoch = start_epoch
     epochs = config["training"]["epochs"]
     checkpoint_dir = config["checkpoint"]["checkpoint_dir"]
+
+    csv_path, json_path = init_experiment_log(checkpoint_dir, config)
 
     # -----------------------------
     # Training loop
     # -----------------------------
     try:
         for epoch in range(start_epoch, epochs + 1):
+            epoch_start = time.time()
+
             train_loss = train_one_epoch(
                 model=model,
                 dataloader=train_loader,
@@ -185,15 +192,18 @@ def main():
                 blank_id=0,
             )
 
+            epoch_time = time.time() - epoch_start
             current_lr = optimizer.param_groups[0]["lr"]
             print(
                 f"Epoch [{epoch}/{epochs}] "
                 f"Train Loss: {train_loss:.4f} "
                 f"Val CER: {val_cer:.4f} "
-                f"LR: {current_lr:.2e}"
+                f"LR: {current_lr:.2e} "
+                f"Time: {epoch_time:.1f}s"
             )
 
             scheduler.step(val_cer)
+            log_epoch(csv_path, epoch, train_loss, val_cer, current_lr, epoch_time)
 
             save_every = config["checkpoint"].get("save_every", 1)
             save_checkpoint(
@@ -207,13 +217,18 @@ def main():
 
             if val_cer < best_cer:
                 best_cer = val_cer
+                best_epoch = epoch
                 save_best_model(
                     model=model,
                     checkpoint_dir=checkpoint_dir
                 )
                 print("Best model saved.")
 
+        finish_experiment_log(json_path, best_cer, best_epoch)
+        print(f"\nExperiment saved to: {checkpoint_dir}")
+
     except KeyboardInterrupt:
+        finish_experiment_log(json_path, best_cer, best_epoch)
         print("\nTraining interrupted.")
         print("Last checkpoint saved in:", checkpoint_dir)
 
