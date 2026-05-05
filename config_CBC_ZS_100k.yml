@@ -29,6 +29,7 @@ training:
   batch_size: 64
   learning_rate: 0.001
   optimizer: adam
+  device: cuda
   num_workers: 4
   scheduler_patience: 5
   scheduler_factor: 0.5
