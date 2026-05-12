@@ -3,8 +3,8 @@ project:
   save_dir: outputs/chunkmerge_paper_100k
 
 dataset:
-  charset: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_100k/charset.json
-  path: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_100k/
+  charset: /home/reah/gen_img/ocr_dataset_split_10k/charset.json
+  path: /home/reah/gen_img/ocr_dataset_split_10k/
   train:
     images: train
     labels: train/labels.txt
@@ -32,7 +32,7 @@ model:
   cnn_channels: 256
 
 training:
-  epochs: 100
+  epochs: 30
   batch_size: 32
   learning_rate: 0.0003
   optimizer: adam

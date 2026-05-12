@@ -3,8 +3,8 @@ project:
   save_dir: outputs/khmer_ocr_10k_densenet_skel
 
 dataset:
-  charset: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_10k/charset.json
-  path: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_10k/
+  charset: /home/reah/gen_img/ocr_dataset_split_10k/charset.json
+  path: /home/reah/gen_img/ocr_dataset_split_10k/
   train:
     images: train
     labels: train/labels.txt
