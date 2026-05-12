@@ -1,0 +1,43 @@
+project:
+  name: khmer_ocr
+  save_dir: outputs/khmer_ocr_10k_v1_skel
+
+dataset:
+  charset: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_10k/charset.json
+  path: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_10k/
+  train:
+    images: train
+    labels: train/labels.txt
+  val:
+    images: val
+    labels: val/labels.txt
+
+preprocessing:
+  image_height: 64
+  image_width: 512
+  grayscale: true
+  normalize: true
+
+model:
+  architecture: cnn_bilstm_ctc_skel
+  hidden_size: 256
+  num_layers: 2
+  dropout: 0.3
+
+training:
+  epochs: 100
+  batch_size: 64
+  learning_rate: 0.001
+  optimizer: adam
+  device: cuda
+  num_workers: 6
+  scheduler_patience: 5
+  scheduler_factor: 0.5
+
+checkpoint:
+  save_every: 5
+  save_best_model: true
+  monitor: val_cer
+  mode: min
+  checkpoint_dir: outputs/khmer_ocr_10k_v1_skel/checkpoints
+  resume_from: null

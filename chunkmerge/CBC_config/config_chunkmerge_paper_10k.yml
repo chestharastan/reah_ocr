@@ -1,0 +1,51 @@
+project:
+  name: khmer_ocr_chunkmerge
+  save_dir: outputs/chunkmerge_paper_10k
+
+dataset:
+  charset: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_10k/charset.json
+  path: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_10k/
+  train:
+    images: train
+    labels: train/labels.txt
+  val:
+    images: val
+    labels: val/labels.txt
+
+preprocessing:
+  image_height: 48
+  image_width: 512
+  grayscale: true
+  normalize: true
+
+model:
+  architecture: chunked_paper_seq2seq
+  d_model: 256
+  nhead: 8
+  num_encoder_layers: 4
+  num_decoder_layers: 4
+  dim_feedforward: 1024
+  dropout: 0.1
+  chunk_width: 100
+  overlap: 16
+  max_target_len: 256
+  cnn_channels: 256
+
+training:
+  epochs: 100
+  batch_size: 32
+  learning_rate: 0.0003
+  optimizer: adam
+  device: cuda
+  num_workers: 6
+  scheduler_patience: 5
+  scheduler_factor: 0.5
+  label_smoothing: 0.1
+
+checkpoint:
+  save_every: 5
+  save_best_model: true
+  monitor: val_cer
+  mode: min
+  checkpoint_dir: outputs/chunkmerge_paper_10k/checkpoints
+  resume_from: null
