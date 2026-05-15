@@ -53,25 +53,25 @@ CONFIGS=(
     # "CBC_config/config_CBC_ZS_50k.yml"
     # "CBC_config/config_CBC_ZS_100k.yml"
 
-    # # ResNet (RBC)
-    # "CBC_config/config_RBC_10k.yml"
-    # "CBC_config/config_RBC_50k.yml"
-    # "CBC_config/config_RBC_100k.yml"
+    # ResNet (RBC)
+    "CBC_config/config_RBC_10k.yml"
+    "CBC_config/config_RBC_50k.yml"
+    "CBC_config/config_RBC_100k.yml"
 
-    # # ResNet + Skeletonization (RBC-ZS)
-    # "CBC_config/config_RBC_ZS_10k.yml"
-    # "CBC_config/config_RBC_ZS_50k.yml"
-    # "CBC_config/config_RBC_ZS_100k.yml"
+    # ResNet + Skeletonization (RBC-ZS)
+    "CBC_config/config_RBC_ZS_10k.yml"
+    "CBC_config/config_RBC_ZS_50k.yml"
+    "CBC_config/config_RBC_ZS_100k.yml"
 
-    # DenseNet BiLSTM (DBC)
-    "CBC_config/config_DBC_10k.yml"
-    "CBC_config/config_DBC_50k.yml"
-    "CBC_config/config_DBC_100k.yml"
+    # # DenseNet BiLSTM (DBC)
+    # "CBC_config/config_DBC_10k.yml"
+    # "CBC_config/config_DBC_50k.yml"
+    # "CBC_config/config_DBC_100k.yml"
 
-    # DenseNet BiLSTM + BiGRU (original densenet)
-    "CBC_config/config_densenet_10k.yml"
-    "CBC_config/config_densenet_50k.yml"
-    "CBC_config/config_densenet_100k.yml"
+    # # DenseNet BiLSTM + BiGRU (original densenet)
+    # "CBC_config/config_densenet_10k.yml"
+    # "CBC_config/config_densenet_50k.yml"
+    # "CBC_config/config_densenet_100k.yml"
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
