@@ -89,11 +89,14 @@ def main():
 
     print("Vocab size:", len(vocab))
 
-    if hasattr(vocab, "idx_to_char"):
-        print("First vocab items:", vocab.idx_to_char[:10])
+    # -----------------------------
+    # wft is this
+    # -----------------------------
+    # if hasattr(vocab, "idx_to_char"):
+    #     print("First vocab items:", vocab.idx_to_char[:10])
 
-    if hasattr(vocab, "char_to_idx"):
-        print("Blank index:", vocab.char_to_idx.get("<blank>"))
+    # if hasattr(vocab, "char_to_idx"):
+    #     print("Blank index:", vocab.char_to_idx.get("<blank>"))
 
     # -----------------------------
     # Collate function

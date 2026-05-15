@@ -1,10 +1,10 @@
 project:
   name: khmer_ocr
-  save_dir: outputs/khmer_ocr_10k_densenet
+  save_dir: outputs/khmer_ocr_50k_resnet
 
 dataset:
-  charset: /home/reah/gen_img/ocr_dataset_split_10k/charset.json
-  path: /home/reah/gen_img/ocr_dataset_split_10k/
+  charset: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_50k/charset.json
+  path: /home/thareah/Desktop/KHM_OCR/ocr_dataset_split_50k/
   train:
     images: train
     labels: train/labels.txt
@@ -19,13 +19,13 @@ preprocessing:
   normalize: true
 
 model:
-  architecture: densenet_bilstm_bigru_ctc
+  architecture: resnet_bilstm_ctc
   hidden_size: 256
   num_layers: 2
   dropout: 0.3
 
 training:
-  epochs: 100
+  epochs: 50
   batch_size: 64
   learning_rate: 0.001
   optimizer: adam
@@ -39,5 +39,5 @@ checkpoint:
   save_best_model: true
   monitor: val_cer
   mode: min
-  checkpoint_dir: outputs/khmer_ocr_10k_densenet/checkpoints
+  checkpoint_dir: outputs/khmer_ocr_50k_resnet/checkpoints
   resume_from: null

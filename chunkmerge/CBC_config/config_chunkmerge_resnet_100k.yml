@@ -1,6 +1,6 @@
 project:
-  name: khmer_ocr
-  save_dir: outputs/khmer_ocr_50k_densenet
+  name: khmer_ocr_chunkmerge
+  save_dir: outputs/chunkmerge_resnet_100k
 
 dataset:
   charset: /home/reah/gen_img/ocr_dataset_split_100k/charset.json
@@ -13,31 +13,40 @@ dataset:
     labels: val/labels.txt
 
 preprocessing:
-  image_height: 64
+  image_height: 48
   image_width: 512
   grayscale: true
   normalize: true
 
 model:
-  architecture: densenet_bilstm_bigru_ctc
-  hidden_size: 256
-  num_layers: 2
-  dropout: 0.3
+  architecture: chunked_resnet_seq2seq
+  d_model: 256
+  nhead: 8
+  num_encoder_layers: 4
+  num_decoder_layers: 4
+  dim_feedforward: 1024
+  dropout: 0.1
+  chunk_width: 100
+  overlap: 16
+  max_target_len: 256
+  cnn_channels: 256
+  resnet_layers: [1, 1, 1]
 
 training:
-  epochs: 50
-  batch_size: 64
-  learning_rate: 0.001
+  epochs: 30
+  batch_size: 32
+  learning_rate: 0.0003
   optimizer: adam
   device: cuda
-  num_workers: 4
+  num_workers: 6
   scheduler_patience: 5
   scheduler_factor: 0.5
+  label_smoothing: 0.1
 
 checkpoint:
   save_every: 5
   save_best_model: true
   monitor: val_cer
   mode: min
-  checkpoint_dir: outputs/khmer_ocr_50k_densenet/checkpoints
+  checkpoint_dir: outputs/chunkmerge_resnet_100k/checkpoints
   resume_from: null
