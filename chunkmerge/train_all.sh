@@ -11,7 +11,7 @@
 # Just run  bash train_all.sh --continue  to carry on.
 
 CONTINUE=0
-if [[ "$1" == "--continue" ]]; then
+if [[ "$1" == "--continue" || "$1" == "--countinue" || "$1" == "--cont" ]]; then
     CONTINUE=1
 fi
 
@@ -29,13 +29,24 @@ print(c)
 }
 
 is_finished() {
-    local json="$1/experiment.json"
-    [ -f "$json" ] || { echo "no"; return; }
     python -c "
-import json, sys
-d = json.load(open(sys.argv[1]))
-print('yes' if d.get('finished_at') else 'no')
-" "$json"
+import yaml, csv, os, sys
+
+config = yaml.safe_load(open(sys.argv[1]))
+total_epochs = config['training']['epochs']
+ckpt_dir     = config['checkpoint']['checkpoint_dir']
+metrics      = os.path.join(ckpt_dir, 'metrics.csv')
+
+if not os.path.exists(metrics):
+    print('no')
+    sys.exit()
+
+with open(metrics) as f:
+    rows = list(csv.DictReader(f))
+
+last_epoch = int(rows[-1]['epoch']) if rows else 0
+print('yes' if last_epoch >= total_epochs else 'no')
+" "$1"
 }
 
 # ── Configs to train (comment out any you want to skip) ──────────────────────
@@ -88,7 +99,7 @@ for i in "${!CONFIGS[@]}"; do
     LAST_CKPT="$CKPT_DIR/last_model.pth"
 
     # ── Skip already-finished models (both modes) ────────────────────────────
-    if [[ "$(is_finished "$CKPT_DIR")" == "yes" ]]; then
+    if [[ "$(is_finished "$CONFIG")" == "yes" ]]; then
         SKIPPED=$((SKIPPED + 1))
         echo ""
         echo "[$NUM/$TOTAL] SKIP (already finished): $NAME"
