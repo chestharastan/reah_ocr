@@ -20,7 +20,7 @@ preprocessing:
 
 model:
   architecture: densenet_bilstm_bigru_ctc
-  hidden_size: 256
+  hidden_size: 256tihs
   num_layers: 2
   dropout: 0.3
 
