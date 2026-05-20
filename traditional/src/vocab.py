@@ -39,3 +39,15 @@ class KhmerVocab:
 
     def __len__(self):
         return len(self.idx_to_char)
+
+
+class KhmerVocabAttention(KhmerVocab):
+    """KhmerVocab extended with <sos> and <eos> tokens at the end."""
+
+    def __init__(self, charset_path):
+        super().__init__(charset_path)
+        self.sos_id = len(self.idx_to_char)
+        self.eos_id = len(self.idx_to_char) + 1
+        self.idx_to_char = self.idx_to_char + ["<sos>", "<eos>"]
+        self.char_to_idx["<sos>"] = self.sos_id
+        self.char_to_idx["<eos>"] = self.eos_id

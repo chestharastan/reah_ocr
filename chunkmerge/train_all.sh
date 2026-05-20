@@ -53,19 +53,19 @@ print('yes' if last_epoch >= total_epochs else 'no')
 
 CONFIGS=(
     # Custom CNN paper (chunked_paper_seq2seq)
-    "CBC_config/config_chunkmerge_paper_10k.yml"
+    # "CBC_config/config_chunkmerge_paper_10k.yml"
     "CBC_config/config_chunkmerge_paper_50k.yml"
     "CBC_config/config_chunkmerge_paper_100k.yml"
 
     # Custom CNN paper + Skeletonization
-    "CBC_config/config_chunkmerge_paper_ZS_10k.yml"
-    "CBC_config/config_chunkmerge_paper_ZS_50k.yml"
-    "CBC_config/config_chunkmerge_paper_ZS_100k.yml"
+    # "CBC_config/config_chunkmerge_paper_ZS_10k.yml"
+    # "CBC_config/config_chunkmerge_paper_ZS_50k.yml"
+    # "CBC_config/config_chunkmerge_paper_ZS_100k.yml"
 
     # ResNet (chunked_resnet_seq2seq)
-    "CBC_config/config_chunkmerge_resnet_10k.yml"
-    "CBC_config/config_chunkmerge_resnet_50k.yml"
-    "CBC_config/config_chunkmerge_resnet_100k.yml"
+    # "CBC_config/config_chunkmerge_resnet_10k.yml"
+    # "CBC_config/config_chunkmerge_resnet_50k.yml"
+    # "CBC_config/config_chunkmerge_resnet_100k.yml"
 )
 
 # ─────────────────────────────────────────────────────────────────────────────

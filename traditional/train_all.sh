@@ -71,7 +71,7 @@ CONFIGS=(
     "CBC_config/config_RBC_50k.yml"
     "CBC_config/config_RBC_100k.yml"
 
-    # # ResNet + Skeletonization (RBC-ZS)
+    # ResNet + Skeletonization (RBC-ZS)
     "CBC_config/config_RBC_ZS_10k.yml"
     "CBC_config/config_RBC_ZS_50k.yml"
     "CBC_config/config_RBC_ZS_100k.yml"

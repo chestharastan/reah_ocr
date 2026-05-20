@@ -12,11 +12,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from utils import (load_config, load_checkpoint, save_checkpoint, save_best_model,
                    init_experiment_log, log_epoch, finish_experiment_log)
 from dataset import OCRDataset
-from vocab import KhmerVocab
-from collate import ocr_collate_fn
+from vocab import KhmerVocab, KhmerVocabAttention
+from collate import ocr_collate_fn, ocr_collate_fn_attention
 from architectures import build_model, build_transform
 from train_loop import train_one_epoch
+from train_loop_attention import train_one_epoch_attention
 from validate import validate_one_epoch
+from validate_attention import validate_one_epoch_attention
+
+ATTENTION_ARCHITECTURES = {"cnn_bilstm_attention"}
 
 
 DEFAULT_CONFIG = os.path.join(
@@ -82,26 +86,21 @@ def main():
     print("Val samples:", len(val_dataset))
 
     # -----------------------------
-    # Vocabulary
+    # Vocabulary + Collate (architecture-dependent)
     # -----------------------------
     charset_path = config["dataset"].get("charset")
-    vocab = KhmerVocab(charset_path=charset_path)
+    arch = config["model"]["architecture"]
+    use_attention = arch in ATTENTION_ARCHITECTURES
+
+    if use_attention:
+        vocab = KhmerVocabAttention(charset_path=charset_path)
+        collate_fn = partial(ocr_collate_fn_attention, vocab=vocab)
+        print(f"Using attention decoder (arch={arch})")
+    else:
+        vocab = KhmerVocab(charset_path=charset_path)
+        collate_fn = partial(ocr_collate_fn, vocab=vocab)
 
     print("Vocab size:", len(vocab))
-
-    # -----------------------------
-    # wft is this
-    # -----------------------------
-    # if hasattr(vocab, "idx_to_char"):
-    #     print("First vocab items:", vocab.idx_to_char[:10])
-
-    # if hasattr(vocab, "char_to_idx"):
-    #     print("Blank index:", vocab.char_to_idx.get("<blank>"))
-
-    # -----------------------------
-    # Collate function
-    # -----------------------------
-    collate_fn = partial(ocr_collate_fn, vocab=vocab)
 
     # -----------------------------
     # DataLoaders
@@ -132,7 +131,7 @@ def main():
     # -----------------------------
     # Loss and optimizer
     # -----------------------------
-    criterion = nn.CTCLoss(blank=0, zero_infinity=True)
+    criterion = None if use_attention else nn.CTCLoss(blank=0, zero_infinity=True)
 
     optimizer = torch.optim.Adam(
         model.parameters(),
@@ -179,21 +178,34 @@ def main():
         for epoch in range(start_epoch, epochs + 1):
             epoch_start = time.time()
 
-            train_loss = train_one_epoch(
-                model=model,
-                dataloader=train_loader,
-                optimizer=optimizer,
-                criterion=criterion,
-                device=device,
-            )
-
-            val_cer = validate_one_epoch(
-                model=model,
-                dataloader=val_loader,
-                vocab=vocab,
-                device=device,
-                blank_id=0,
-            )
+            if use_attention:
+                train_loss = train_one_epoch_attention(
+                    model=model,
+                    dataloader=train_loader,
+                    optimizer=optimizer,
+                    device=device,
+                )
+                val_cer = validate_one_epoch_attention(
+                    model=model,
+                    dataloader=val_loader,
+                    vocab=vocab,
+                    device=device,
+                )
+            else:
+                train_loss = train_one_epoch(
+                    model=model,
+                    dataloader=train_loader,
+                    optimizer=optimizer,
+                    criterion=criterion,
+                    device=device,
+                )
+                val_cer = validate_one_epoch(
+                    model=model,
+                    dataloader=val_loader,
+                    vocab=vocab,
+                    device=device,
+                    blank_id=0,
+                )
 
             epoch_time = time.time() - epoch_start
             current_lr = optimizer.param_groups[0]["lr"]
