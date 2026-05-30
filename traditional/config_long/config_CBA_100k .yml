@@ -4,7 +4,7 @@ project:
 
 dataset:
   charset: /home/reah/gen_img/ocr_2_30/charset.json
-  path: /home/reah/gen_img/ocr_2_30/ocr_dataset_split_100k
+  path: /home/reah/gen_img/ocr_2_30/
   train:
     images: train
     labels: train/labels.txt
