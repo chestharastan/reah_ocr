@@ -1,9 +1,8 @@
 project:
   name: khmer_ocr
-  save_dir: outputs/khmer_ocr_100k_densenet_bilstm
+  save_dir: outputs/khmer_ocr_100k_densenet_bilstm_attention
 
 dataset:
-  charset: /home/reah/gen_img/ocr_2_30/charset.json
   charset: /home/reah/gen_img/ocr_2_30/charset.json
   path: /home/reah/gen_img/ocr_2_30/
   train:
@@ -20,7 +19,8 @@ preprocessing:
   normalize: true
 
 model:
-  architecture: densenet_bilstm_ctc
+  architecture: densenet_bilstm_attention
+  decoder: attention    # ctc | attention
   hidden_size: 256
   num_layers: 2
   dropout: 0.3

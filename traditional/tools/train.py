@@ -20,8 +20,6 @@ from train_loop_attention import train_one_epoch_attention
 from validate import validate_one_epoch
 from validate_attention import validate_one_epoch_attention
 
-ATTENTION_ARCHITECTURES = {"cnn_bilstm_attention"}
-
 
 DEFAULT_CONFIG = os.path.join(
     os.path.dirname(__file__),
@@ -90,15 +88,23 @@ def main():
     # -----------------------------
     charset_path = config["dataset"].get("charset")
     arch = config["model"]["architecture"]
-    use_attention = arch in ATTENTION_ARCHITECTURES
+    decoder = config["model"].get("decoder", "ctc").lower()
+
+    if decoder not in ("ctc", "attention"):
+        raise ValueError(
+            f"Unknown decoder '{decoder}'. Supported: 'ctc', 'attention'."
+        )
+
+    use_attention = decoder == "attention"
 
     if use_attention:
         vocab = KhmerVocabAttention(charset_path=charset_path)
         collate_fn = partial(ocr_collate_fn_attention, vocab=vocab)
-        print(f"Using attention decoder (arch={arch})")
     else:
         vocab = KhmerVocab(charset_path=charset_path)
         collate_fn = partial(ocr_collate_fn, vocab=vocab)
+
+    print(f"Using {decoder} decoder (arch={arch})")
 
     print("Vocab size:", len(vocab))
 

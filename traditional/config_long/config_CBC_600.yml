@@ -1,6 +1,6 @@
 project:
   name: khmer_ocr
-  save_dir: outputs/khmer_ocr_600k_densenet_bilstm_attention
+  save_dir: outputs/khmer_ocr_600k_densenet_bilstm_ctc
 
 dataset:
   charset: /home/reah/gen_img/ocr_2_30/charset.json
@@ -19,7 +19,8 @@ preprocessing:
   normalize: true
 
 model:
-  architecture: densenet_bilstm_attention
+  architecture: densenet_bilstm_ctc
+  decoder: ctc          # ctc | attention
   hidden_size: 256
   num_layers: 2
   dropout: 0.3
@@ -39,5 +40,5 @@ checkpoint:
   save_best_model: true
   monitor: val_cer
   mode: min
-  checkpoint_dir: outputs/ocr_2_30_Attention/checkpoints
+  checkpoint_dir: outputs/ocr_2_30_CTC/checkpoints
   resume_from: null
