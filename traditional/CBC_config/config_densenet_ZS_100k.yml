@@ -24,6 +24,7 @@ model:
   num_layers: 2
   dropout: 0.3
 
+
 training:
   epochs: 30
   batch_size: 64
