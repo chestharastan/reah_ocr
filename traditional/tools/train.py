@@ -44,13 +44,22 @@ def parse_args():
     return parser.parse_args()
 
 
+def make_loader(dataset, config, collate_fn, device, shuffle=False):
+    return DataLoader(
+        dataset,
+        batch_size=config["training"]["batch_size"],
+        shuffle=shuffle,
+        collate_fn=collate_fn,
+        num_workers=config["training"].get("num_workers", 0),
+        pin_memory=device.type == "cuda",
+    )
+
+
 def main():
     args = parse_args()
     config = load_config(args.config)
 
-    # -----------------------------
     # Device
-    # -----------------------------
     if torch.cuda.is_available() and config["training"]["device"] == "cuda":
         device = torch.device("cuda")
     else:
@@ -58,14 +67,7 @@ def main():
 
     print("Using device:", device)
 
-    # -----------------------------
-    # Transform
-    # -----------------------------
     transform = build_transform(config)
-
-    # -----------------------------
-    # Dataset paths
-    # -----------------------------
     base = config["dataset"]["path"]
 
     train_dataset = OCRDataset(
@@ -80,20 +82,27 @@ def main():
         transform=transform,
     )
 
-    print("Train samples:", len(train_dataset))
-    print("Val samples:", len(val_dataset))
+    test_cfg = config["dataset"].get("test")
+    test_dataset = None
+    if test_cfg:
+        test_dataset = OCRDataset(
+            image_dir=os.path.join(base, test_cfg["images"]),
+            label_path=os.path.join(base, test_cfg["labels"]),
+            transform=transform,
+        )
 
-    # -----------------------------
-    # Vocabulary + Collate (architecture-dependent)
-    # -----------------------------
+    print("Train samples:", len(train_dataset))
+    print("Val samples  :", len(val_dataset))
+    if test_dataset:
+        print("Test samples :", len(test_dataset))
+
+    # Vocabulary + collate
     charset_path = config["dataset"].get("charset")
     arch = config["model"]["architecture"]
     decoder = config["model"].get("decoder", "ctc").lower()
 
     if decoder not in ("ctc", "attention"):
-        raise ValueError(
-            f"Unknown decoder '{decoder}'. Supported: 'ctc', 'attention'."
-        )
+        raise ValueError(f"Unknown decoder '{decoder}'. Supported: 'ctc', 'attention'.")
 
     use_attention = decoder == "attention"
 
@@ -105,38 +114,16 @@ def main():
         collate_fn = partial(ocr_collate_fn, vocab=vocab)
 
     print(f"Using {decoder} decoder (arch={arch})")
-
     print("Vocab size:", len(vocab))
 
-    # -----------------------------
     # DataLoaders
-    # -----------------------------
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config["training"]["batch_size"],
-        shuffle=True,
-        collate_fn=collate_fn,
-        num_workers=config["training"].get("num_workers", 0),
-        pin_memory=device.type == "cuda",
-    )
+    train_loader = make_loader(train_dataset, config, collate_fn, device, shuffle=True)
+    val_loader   = make_loader(val_dataset,   config, collate_fn, device, shuffle=False)
+    test_loader  = make_loader(test_dataset,  config, collate_fn, device, shuffle=False) if test_dataset else None
 
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=config["training"]["batch_size"],
-        shuffle=False,
-        collate_fn=collate_fn,
-        num_workers=config["training"].get("num_workers", 0),
-        pin_memory=device.type == "cuda",
-    )
-
-    # -----------------------------
     # Model
-    # -----------------------------
     model = build_model(config, num_classes=len(vocab)).to(device)
 
-    # -----------------------------
-    # Loss and optimizer
-    # -----------------------------
     criterion = None if use_attention else nn.CTCLoss(blank=0, zero_infinity=True)
 
     optimizer = torch.optim.Adam(
@@ -152,24 +139,12 @@ def main():
         min_lr=1e-6,
     )
 
-    # -----------------------------
-    # Resume checkpoint
-    # -----------------------------
+    # Resume
     resume_path = args.resume or config["checkpoint"].get("resume_from")
-
     start_epoch = 1
-
     if resume_path:
-        start_epoch = load_checkpoint(
-            resume_path,
-            model,
-            optimizer,
-            device
-        )
+        start_epoch = load_checkpoint(resume_path, model, optimizer, device)
 
-    # -----------------------------
-    # Training setup
-    # -----------------------------
     best_cer = float("inf")
     best_epoch = start_epoch
     epochs = config["training"]["epochs"]
@@ -177,9 +152,6 @@ def main():
 
     csv_path, json_path = init_experiment_log(checkpoint_dir, config)
 
-    # -----------------------------
-    # Training loop
-    # -----------------------------
     try:
         for epoch in range(start_epoch, epochs + 1):
             epoch_start = time.time()
@@ -191,7 +163,7 @@ def main():
                     optimizer=optimizer,
                     device=device,
                 )
-                val_cer = validate_one_epoch_attention(
+                val_cer, val_wer = validate_one_epoch_attention(
                     model=model,
                     dataloader=val_loader,
                     vocab=vocab,
@@ -205,7 +177,7 @@ def main():
                     criterion=criterion,
                     device=device,
                 )
-                val_cer = validate_one_epoch(
+                val_cer, val_wer = validate_one_epoch(
                     model=model,
                     dataloader=val_loader,
                     vocab=vocab,
@@ -217,14 +189,14 @@ def main():
             current_lr = optimizer.param_groups[0]["lr"]
             print(
                 f"Epoch [{epoch}/{epochs}] "
-                f"Train Loss: {train_loss:.4f} "
-                f"Val CER: {val_cer:.4f} "
-                f"LR: {current_lr:.2e} "
-                f"Time: {epoch_time:.1f}s"
+                f"Time: {epoch_time:.1f}s "
+                f"Loss: {train_loss:.4f} "
+                f"CER: {val_cer:.4f} "
+                f"WER: {val_wer:.4f}"
             )
 
             scheduler.step(val_cer)
-            log_epoch(csv_path, epoch, train_loss, val_cer, current_lr, epoch_time)
+            log_epoch(csv_path, epoch, epoch_time, train_loss, val_cer, val_wer)
 
             save_every = config["checkpoint"].get("save_every", 1)
             save_checkpoint(
@@ -239,13 +211,27 @@ def main():
             if val_cer < best_cer:
                 best_cer = val_cer
                 best_epoch = epoch
-                save_best_model(
-                    model=model,
-                    checkpoint_dir=checkpoint_dir
-                )
+                save_best_model(model=model, checkpoint_dir=checkpoint_dir)
                 print("Best model saved.")
 
-        finish_experiment_log(json_path, best_cer, best_epoch)
+        # Final test evaluation on best model
+        test_cer, test_wer = None, None
+        if test_loader:
+            best_model_path = os.path.join(checkpoint_dir, "best_model.pth")
+            if os.path.exists(best_model_path):
+                model.load_state_dict(torch.load(best_model_path, map_location=device))
+                print("\nEvaluating on test set (best model)...")
+                if use_attention:
+                    test_cer, test_wer = validate_one_epoch_attention(
+                        model=model, dataloader=test_loader, vocab=vocab, device=device
+                    )
+                else:
+                    test_cer, test_wer = validate_one_epoch(
+                        model=model, dataloader=test_loader, vocab=vocab, device=device, blank_id=0
+                    )
+                print(f"Test CER: {test_cer:.4f}  Test WER: {test_wer:.4f}")
+
+        finish_experiment_log(json_path, best_cer, best_epoch, test_cer=test_cer, test_wer=test_wer)
         print(f"\nExperiment saved to: {checkpoint_dir}")
 
     except KeyboardInterrupt:

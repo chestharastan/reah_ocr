@@ -1,4 +1,5 @@
 import argparse
+import importlib
 import os
 import sys
 
@@ -7,6 +8,21 @@ from PIL import Image
 import torchvision.transforms as T
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
+ARCH_MODULES = {
+    "vgg_bilstm_ctc":                 "architectures.vgg_bilstm_ctc",
+    "vgg_bilstm_attention":           "architectures.vgg_bilstm_attention",
+    "resnet_bilstm_ctc":              "architectures.resnet_bilstm_ctc",
+    "resnet_bilstm_ctc_skel":         "architectures.resnet_bilstm_ctc_skel",
+    "resnet_bilstm_bigru_ctc":        "architectures.resnet_bilstm_bigru_ctc",
+    "resnet_bilstm_attention":        "architectures.resnet_bilstm_attention",
+    "densenet_bilstm_ctc":            "architectures.densenet.densenet_bilstm_ctc",
+    "densenet_bilstm_ctc_skel":       "architectures.densenet.densenet_bilstm_ctc_skel",
+    "densenet_bilstm_attention":      "architectures.densenet.densenet_bilstm_attention",
+    "densenet_bilstm_attention_skel": "architectures.densenet.densenet_bilstm_attention_skel",
+    "densenet_bilstm_bigru_ctc":      "architectures.densenet.densenet_bilstm_bigru_ctc",
+    "densenet_bilstm_bigru_ctc_skel": "architectures.densenet.densenet_bilstm_bigru_ctc_skel",
+}
 
 from vocab import KhmerVocab
 
@@ -60,13 +76,10 @@ def load_model(model_path, num_classes, arch, device):
         sys.exit(1)
 
     # Build model
-    if arch == "cnn_bilstm_ctc_skel":
-        from architectures.cnn_bilstm_ctc_skel import Model
-    elif arch == "cnn_bilstm_ctc":
-        from architectures.cnn_bilstm_ctc import Model
-    else:
-        print(f"ERROR: unknown architecture '{arch}'. Use cnn_bilstm_ctc or cnn_bilstm_ctc_skel.")
+    if arch not in ARCH_MODULES:
+        print(f"ERROR: unknown architecture '{arch}'. Available: {list(ARCH_MODULES)}")
         sys.exit(1)
+    Model = importlib.import_module(ARCH_MODULES[arch]).Model
 
     model = Model(num_classes=num_classes)
     model.load_state_dict(state_dict)
@@ -104,8 +117,8 @@ def main():
                         help="Path to saved model checkpoint")
     parser.add_argument("--charset", default="ocr_data_100k/charset.json",
                         help="Path to charset.json")
-    parser.add_argument("--arch", default="cnn_bilstm_ctc_skel",
-                        choices=["cnn_bilstm_ctc", "cnn_bilstm_ctc_skel"],
+    parser.add_argument("--arch", default="resnet_bilstm_ctc",
+                        choices=list(ARCH_MODULES),
                         help="Model architecture")
     parser.add_argument("--num-classes", type=int, default=None,
                         help="Override num_classes (auto-detected from checkpoint by default)")

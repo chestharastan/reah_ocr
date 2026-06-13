@@ -75,43 +75,38 @@ def ids_to_text(ids, vocab):
 def validate_one_epoch(model, dataloader, vocab, device, blank_id=0):
     model.eval()
 
-    total_distance = 0
-    total_characters = 0
+    total_char_dist = 0
+    total_chars = 0
+    total_word_dist = 0
+    total_words = 0
 
     with torch.no_grad():
         for images, labels, label_lengths in dataloader:
             images = images.to(device)
 
             outputs = model(images)
-
-            # outputs shape: [batch, time, num_classes]
             pred_ids = outputs.argmax(dim=2)
 
             label_start = 0
-
             for i in range(images.size(0)):
                 label_length = label_lengths[i].item()
-
                 true_ids = labels[label_start:label_start + label_length].tolist()
                 label_start += label_length
 
-                pred_sequence = pred_ids[i].cpu().tolist()
-                pred_decoded_ids = ctc_decode(
-                    pred_sequence,
-                    blank_id=blank_id
-                )
+                pred_decoded_ids = ctc_decode(pred_ids[i].cpu().tolist(), blank_id=blank_id)
 
                 true_text = ids_to_text(true_ids, vocab)
                 pred_text = ids_to_text(pred_decoded_ids, vocab)
 
-                distance = levenshtein_distance(pred_text, true_text)
+                total_char_dist += levenshtein_distance(pred_text, true_text)
+                total_chars += len(true_text)
 
-                total_distance += distance
-                total_characters += len(true_text)
+                true_words = true_text.split()
+                pred_words = pred_text.split()
+                total_word_dist += levenshtein_distance(pred_words, true_words)
+                total_words += len(true_words)
 
-    if total_characters == 0:
-        return 1.0
+    cer = total_char_dist / total_chars if total_chars > 0 else 1.0
+    wer = total_word_dist / total_words if total_words > 0 else 1.0
 
-    cer = total_distance / total_characters
-
-    return cer
+    return cer, wer

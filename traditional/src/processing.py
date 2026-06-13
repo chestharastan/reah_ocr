@@ -1,10 +1,8 @@
 import cv2
 import numpy as np
-from skimage.filters import threshold_sauvola
 from dataclasses import dataclass
 from typing import Tuple
 import os
-
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -60,8 +58,15 @@ def sauvola_binarize(gray: np.ndarray, window_size: int = 25, k: float = 0.2) ->
     if window_size % 2 == 0:
         window_size += 1
 
-    thresh = threshold_sauvola(gray, window_size=window_size, k=k)
-    binary = (gray < thresh).astype(np.uint8)  # dark pixels = ink = foreground
+    gray_f = gray.astype(np.float64)
+    R = 128.0  # max std dev of a grayscale image
+
+    mean = cv2.boxFilter(gray_f, ddepth=-1, ksize=(window_size, window_size), normalize=True)
+    mean_sq = cv2.boxFilter(gray_f ** 2, ddepth=-1, ksize=(window_size, window_size), normalize=True)
+    std = np.sqrt(np.maximum(mean_sq - mean ** 2, 0))
+
+    thresh = mean * (1.0 + k * (std / R - 1.0))
+    binary = (gray_f < thresh).astype(np.uint8)  # dark pixels = ink = foreground
     return binary
 
 

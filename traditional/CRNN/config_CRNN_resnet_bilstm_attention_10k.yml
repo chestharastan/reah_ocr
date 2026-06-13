@@ -1,32 +1,36 @@
 project:
-  name: khmer_ocr
-  save_dir: outputs/khmer_ocr_100k_v2
+  name: crnn_resnet_bilstm_attention_10k
+  save_dir: outputs_crnn/resnet_bilstm_attention_10k
 
 dataset:
-  charset: /home/reah/gen_img/ocr_dataset_split_100k/charset.json
-  path: /home/reah/gen_img/ocr_dataset_split_100k/
+  charset: /home/thareah/Desktop/KHM_OCR/khmer_10k/char.json
+  path: /home/thareah/Desktop/KHM_OCR/khmer_10k/
   train:
     images: train
     labels: train/labels.txt
   val:
     images: val
     labels: val/labels.txt
+  test:
+    images: test
+    labels: test/labels.txt
 
-preprocessing: 
+preprocessing:
   image_height: 64
   image_width: 512
   grayscale: true
   normalize: true
 
 model:
-  architecture: densenet_bilstm_attention
+  architecture: resnet_bilstm_attention
+  decoder: attention
   hidden_size: 256
   num_layers: 2
   dropout: 0.3
 
 training:
-  epochs: 50
-  batch_size: 64
+  epochs: 100
+  batch_size: 16
   learning_rate: 0.001
   optimizer: adam
   device: cuda
@@ -39,5 +43,5 @@ checkpoint:
   save_best_model: true
   monitor: val_cer
   mode: min
-  checkpoint_dir: outputs/khmer_ocr_100k_v1/checkpoints
+  checkpoint_dir: outputs_crnn/resnet_bilstm_attention_10k/checkpoints
   resume_from: null

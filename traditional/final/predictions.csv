@@ -1,0 +1,5 @@
+image,model,prediction
+/home/thareah/Desktop/text_img/original/khmer_10k/test/images/0000001.jpg,vgg_bilstm_ctc_10k,ទី ១១ងេ)
+/home/thareah/Desktop/text_img/original/khmer_10k/test/images/0000001.jpg,vgg_bilstm_ctc_50k,ទី ១១(ង)
+/home/thareah/Desktop/text_img/original/khmer_10k/test/images/0000002.jpg,vgg_bilstm_ctc_10k,ក)
+/home/thareah/Desktop/text_img/original/khmer_10k/test/images/0000002.jpg,vgg_bilstm_ctc_50k,(ក ) –

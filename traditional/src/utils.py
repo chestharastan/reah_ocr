@@ -54,7 +54,7 @@ def init_experiment_log(checkpoint_dir, config):
     if not os.path.exists(csv_path):
         with open(csv_path, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["epoch", "train_loss", "val_cer", "lr", "epoch_time_s"])
+            writer.writerow(["epoch", "epoch_time_s", "train_loss", "val_cer", "val_wer"])
 
     json_path = os.path.join(checkpoint_dir, "experiment.json")
     # On resume, keep the original started_at from the existing summary.
@@ -78,14 +78,15 @@ def init_experiment_log(checkpoint_dir, config):
     return csv_path, json_path
 
 
-def log_epoch(csv_path, epoch, train_loss, val_cer, lr, epoch_time=None):
+def log_epoch(csv_path, epoch, epoch_time, train_loss, val_cer, val_wer):
     with open(csv_path, "a", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([epoch, f"{train_loss:.6f}", f"{val_cer:.6f}", f"{lr:.2e}",
-                         f"{epoch_time:.1f}" if epoch_time is not None else ""])
+        writer.writerow([epoch,
+                         f"{epoch_time:.1f}" if epoch_time is not None else "",
+                         f"{train_loss:.6f}", f"{val_cer:.6f}", f"{val_wer:.6f}"])
 
 
-def finish_experiment_log(json_path, best_cer, best_epoch):
+def finish_experiment_log(json_path, best_cer, best_epoch, test_cer=None, test_wer=None):
     with open(json_path, "r") as f:
         summary = json.load(f)
 
@@ -99,6 +100,10 @@ def finish_experiment_log(json_path, best_cer, best_epoch):
     summary["best_epoch"] = best_epoch
     summary["finished_at"] = finished_at.strftime("%Y-%m-%d %H:%M:%S")
     summary["time_trained"] = f"{h}h {m:02d}m {s:02d}s"
+    if test_cer is not None:
+        summary["test_cer"] = round(test_cer, 6)
+    if test_wer is not None:
+        summary["test_wer"] = round(test_wer, 6)
 
     with open(json_path, "w") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)

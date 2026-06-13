@@ -1,4 +1,12 @@
 **/outputs/
+**/outputs_crnn/
 .claude/
 outputs1/
 logs/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Per-epoch training checkpoints (keep best_model/last_model/experiment.json)
+**/checkpoints/epoch_*.pth
