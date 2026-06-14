@@ -1,17 +1,22 @@
 #!/bin/bash
 # =============================================================================
-# CRNN Training Runner
+# CRNN Training Runner — SKELETON images
+#
+# Uses pre-computed skeleton-converted images (saved on disk) and its own config
+# folder (CRNN_skel/). Unlike train.sh (plain grayscale), these configs set
+# preprocessing.binarize=True, so the input is thresholded to black-and-white.
+# The other differences from train.sh are the input dataset and output/log paths.
 #
 # Run from the traditional/ directory:
 #
-#   bash train.sh             — run all configs, stop on first error
-#   bash train.sh --continue  — resume interrupted; skip finished & failed
+#   bash train_skel.sh             — run all configs, stop on first error
+#   bash train_skel.sh --continue  — resume interrupted; skip finished & failed
 #
 # Ctrl+C any time, then re-run with --continue to pick up where you left off.
 # =============================================================================
 
 # ─── SET YOUR DATASET BASE PATH HERE ─────────────────────────────────────────
-DATASET_BASE="/home/thareah/Desktop/text_img/original"
+DATASET_BASE="/home/thareah/Desktop/text_img/skeleton"
 # Dataset subdirectories are derived automatically:
 #   ${DATASET_BASE}/khmer_10k/
 #   ${DATASET_BASE}/khmer_50k/
@@ -22,7 +27,7 @@ DATASET_BASE="/home/thareah/Desktop/text_img/original"
 # All run outputs (checkpoints, logs, metrics) are written under here, replacing
 # the default "outputs_crnn" prefix in each config. Per-run subdirs are kept:
 #   ${OUTPUT_BASE}/vgg_bilstm_ctc_10k/checkpoints/
-OUTPUT_BASE="/home/thareah/Desktop/server_config/reah_ocr/traditional/outputs_crnn"
+OUTPUT_BASE="/home/thareah/Desktop/server_config/reah_ocr/traditional/outputs_crnn_skel"
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Parse flags ───────────────────────────────────────────────────────────────
@@ -36,28 +41,28 @@ done
 # ── Configs ───────────────────────────────────────────────────────────────────
 CONFIGS=(
     # VGG
-    CRNN/config_CRNN_vgg_bilstm_ctc_10k.yml
-    CRNN/config_CRNN_vgg_bilstm_ctc_50k.yml
-    CRNN/config_CRNN_vgg_bilstm_ctc_100k.yml
-    CRNN/config_CRNN_vgg_bilstm_attention_10k.yml
-    CRNN/config_CRNN_vgg_bilstm_attention_50k.yml
-    CRNN/config_CRNN_vgg_bilstm_attention_100k.yml
+    CRNN_skel/config_CRNN_skel_vgg_bilstm_ctc_10k.yml
+    CRNN_skel/config_CRNN_skel_vgg_bilstm_ctc_50k.yml
+    CRNN_skel/config_CRNN_skel_vgg_bilstm_ctc_100k.yml
+    CRNN_skel/config_CRNN_skel_vgg_bilstm_attention_10k.yml
+    CRNN_skel/config_CRNN_skel_vgg_bilstm_attention_50k.yml
+    CRNN_skel/config_CRNN_skel_vgg_bilstm_attention_100k.yml
 
     # ResNet
-    CRNN/config_CRNN_resnet_bilstm_ctc_10k.yml
-    CRNN/config_CRNN_resnet_bilstm_ctc_50k.yml
-    CRNN/config_CRNN_resnet_bilstm_ctc_100k.yml
-    CRNN/config_CRNN_resnet_bilstm_attention_10k.yml
-    CRNN/config_CRNN_resnet_bilstm_attention_50k.yml
-    CRNN/config_CRNN_resnet_bilstm_attention_100k.yml
+    CRNN_skel/config_CRNN_skel_resnet_bilstm_ctc_10k.yml
+    CRNN_skel/config_CRNN_skel_resnet_bilstm_ctc_50k.yml
+    CRNN_skel/config_CRNN_skel_resnet_bilstm_ctc_100k.yml
+    CRNN_skel/config_CRNN_skel_resnet_bilstm_attention_10k.yml
+    CRNN_skel/config_CRNN_skel_resnet_bilstm_attention_50k.yml
+    CRNN_skel/config_CRNN_skel_resnet_bilstm_attention_100k.yml
 
     # DenseNet
-    CRNN/config_CRNN_densenet_bilstm_ctc_10k.yml
-    CRNN/config_CRNN_densenet_bilstm_ctc_50k.yml
-    CRNN/config_CRNN_densenet_bilstm_ctc_100k.yml
-    CRNN/config_CRNN_densenet_bilstm_attention_10k.yml
-    CRNN/config_CRNN_densenet_bilstm_attention_50k.yml
-    CRNN/config_CRNN_densenet_bilstm_attention_100k.yml
+    CRNN_skel/config_CRNN_skel_densenet_bilstm_ctc_10k.yml
+    CRNN_skel/config_CRNN_skel_densenet_bilstm_ctc_50k.yml
+    CRNN_skel/config_CRNN_skel_densenet_bilstm_ctc_100k.yml
+    CRNN_skel/config_CRNN_skel_densenet_bilstm_attention_10k.yml
+    CRNN_skel/config_CRNN_skel_densenet_bilstm_attention_50k.yml
+    CRNN_skel/config_CRNN_skel_densenet_bilstm_attention_100k.yml
 )
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -116,7 +121,7 @@ print(tmp.name)
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
-LOG_DIR="logs/crnn"
+LOG_DIR="logs/crnn_skel"
 mkdir -p "$LOG_DIR"
 
 TOTAL=${#CONFIGS[@]}
@@ -124,7 +129,7 @@ PASSED=0 SKIPPED=0 FAILED=0
 FAILED_NAMES=()
 
 echo "======================================================"
-echo "  CRNN Training"
+echo "  CRNN Training (SKELETON)"
 echo "  Configs  : $TOTAL"
 echo "  Dataset  : $DATASET_BASE"
 echo "  Output   : $OUTPUT_BASE"

@@ -1,5 +1,6 @@
 **/outputs/
 **/outputs_crnn/
+**/outputs_crnn_skel/
 .claude/
 outputs1/
 logs/

@@ -42,7 +42,17 @@ def build_transform(config):
     if name not in REGISTRY:
         raise ValueError(f"Unknown architecture '{name}'. Available: {list(REGISTRY)}")
     _, transform_fn = REGISTRY[name]
-    return transform_fn(
+    transform = transform_fn(
         config["preprocessing"]["image_height"],
         config["preprocessing"]["image_width"],
     )
+
+    # Optional binarization (driven by config, e.g. set by train_skel.sh).
+    # The default pipeline is plain grayscale; when enabled we prepend a fixed
+    # threshold so the model sees black-and-white input.
+    if config.get("preprocessing", {}).get("binarize", False):
+        from torchvision import transforms
+        from transforms import BinaryTransform
+        transform = transforms.Compose([BinaryTransform(), *transform.transforms])
+
+    return transform

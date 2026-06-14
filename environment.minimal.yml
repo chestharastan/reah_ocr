@@ -1,0 +1,7 @@
+name: reahocr
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - ipykernel
+prefix: /home/thareah/miniconda3/envs/reahocr
