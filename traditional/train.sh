@@ -11,7 +11,7 @@
 # =============================================================================
 
 # ─── SET YOUR DATASET BASE PATH HERE ─────────────────────────────────────────
-DATASET_BASE="/home/thareah/Desktop/text_img/original"
+DATASET_BASE="/home/thareah/Desktop/text_img/khmer_eng_300k"
 # Dataset subdirectories are derived automatically:
 #   ${DATASET_BASE}/khmer_10k/
 #   ${DATASET_BASE}/khmer_50k/
@@ -36,24 +36,24 @@ done
 # ── Configs ───────────────────────────────────────────────────────────────────
 CONFIGS=(
     # VGG
-    CRNN/config_CRNN_vgg_bilstm_ctc_10k.yml
-    CRNN/config_CRNN_vgg_bilstm_ctc_50k.yml
-    CRNN/config_CRNN_vgg_bilstm_ctc_100k.yml
-    CRNN/config_CRNN_vgg_bilstm_attention_10k.yml
-    CRNN/config_CRNN_vgg_bilstm_attention_50k.yml
-    CRNN/config_CRNN_vgg_bilstm_attention_100k.yml
+    # CRNN/config_CRNN_vgg_bilstm_ctc_10k.yml
+    # CRNN/config_CRNN_vgg_bilstm_ctc_50k.yml
+    # CRNN/config_CRNN_vgg_bilstm_ctc_100k.yml
+    # CRNN/config_CRNN_vgg_bilstm_attention_10k.yml
+    # CRNN/config_CRNN_vgg_bilstm_attention_50k.yml
+    # CRNN/config_CRNN_vgg_bilstm_attention_100k.yml
 
     # ResNet
     CRNN/config_CRNN_resnet_bilstm_ctc_10k.yml
-    CRNN/config_CRNN_resnet_bilstm_ctc_50k.yml
-    CRNN/config_CRNN_resnet_bilstm_ctc_100k.yml
-    CRNN/config_CRNN_resnet_bilstm_attention_10k.yml
-    CRNN/config_CRNN_resnet_bilstm_attention_50k.yml
-    CRNN/config_CRNN_resnet_bilstm_attention_100k.yml
+    # CRNN/config_CRNN_resnet_bilstm_ctc_50k.yml
+    # CRNN/config_CRNN_resnet_bilstm_ctc_100k.yml
+    # CRNN/config_CRNN_resnet_bilstm_attention_10k.yml
+    # CRNN/config_CRNN_resnet_bilstm_attention_50k.yml
+    # CRNN/config_CRNN_resnet_bilstm_attention_100k.yml
 
     # DenseNet
-    CRNN/config_CRNN_densenet_bilstm_ctc_10k.yml
-    CRNN/config_CRNN_densenet_bilstm_ctc_50k.yml
+    # CRNN/config_CRNN_densenet_bilstm_ctc_10k.yml
+    # CRNN/config_CRNN_densenet_bilstm_ctc_50k.yml
     CRNN/config_CRNN_densenet_bilstm_ctc_100k.yml
     CRNN/config_CRNN_densenet_bilstm_attention_10k.yml
     CRNN/config_CRNN_densenet_bilstm_attention_50k.yml

@@ -1,0 +1,46 @@
+project:
+  name: crnn_resnet_bilstm_ctc_300k
+  save_dir: outputs_crnn/resnet_bilstm_ctc_300k
+
+dataset:
+  charset: /home/thareah/Desktop/text_img/khmer_eng_300k/char.json
+  path: /home/thareah/Desktop/text_img/khmer_eng_300k/
+  train:
+    images: train
+    labels: train/labels.txt
+  val:
+    images: val
+    labels: val/labels.txt
+  test:
+    images: test
+    labels: test/labels.txt
+
+preprocessing:
+  image_height: 64
+  image_width: 512
+  grayscale: true
+  normalize: true
+
+model:
+  architecture: resnet_bilstm_ctc
+  hidden_size: 256
+  num_layers: 2
+  dropout: 0.3
+
+training:
+  epochs: 30
+  batch_size: 16
+  learning_rate: 0.001
+  optimizer: adam
+  device: cuda
+  num_workers: 4
+  scheduler_patience: 5
+  scheduler_factor: 0.5
+
+checkpoint:
+  save_every: 5
+  save_best_model: true
+  monitor: val_cer
+  mode: min
+  checkpoint_dir: outputs_crnn/resnet_bilstm_ctc_300k/checkpoints
+  resume_from: null
